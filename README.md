@@ -381,4 +381,4 @@ Distributed under the MIT License. See `LICENSE` file for more information.
 Hruthvik - [hruthvik2K3@gmail.com](mailto:hruthvik2K3@gmail.com)
 
 
-Project Link: [https://github.com/hruthvik-04/AI-ECG-ANALYSIS-PROJECT](https://github.com/hruthvik-04/AI-ECG-ANALYSIS-PROJECT)
+Project Link: [https://github.com/hruthvik-04/AI-ECG-ANALYSIS-MINDTECK.git](https://github.com/hruthvik-04/AI-ECG-ANALYSIS-MINDTECK.git)
