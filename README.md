@@ -50,6 +50,47 @@ cleaned_ecg = ecg_clean(raw_signal, sampling_rate=100)
 
 ## Installation
 
+
+## Technology Stack
+
+| Category          | Technologies Used                 |
+| :---------------- | :-------------------------------- |
+| **Backend**       | Python, Flask                     |
+| **Database**      | MySQL                             |
+| **Authentication**| Flask-Login, Flask-Bcrypt         |
+| **ML/AI**         | TensorFlow/Keras                  |
+| **ECG Processing**| WFDB, NeuroKit2, SciPy, NumPy     |
+| **Data Handling** | Pandas                            |
+| **Visualization** | Plotly                            |
+| **PDF Generation**| xhtml2pdf / WeasyPrint (Optional) |
+
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+*   **Python:** Version 3.8 or higher.
+*   **MySQL Server:** Community Server recommended (See Installation steps below).
+*   **Git:** For cloning the repository.
+*   **System Dependencies:** Required for certain Python packages (especially `mysqlclient` and PDF generators).
+    *   **For Ubuntu/Debian:**
+        ```bash
+        sudo apt-get update && sudo apt-get install -y python3-dev default-libmysqlclient-dev build-essential libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 libffi-dev shared-mime-info pkg-config
+        ```
+    *   **For Fedora/CentOS/RHEL:**
+        ```bash
+        sudo yum update && sudo yum install -y python3-devel mysql-devel gcc-c++ cairo pango gdk-pixbuf2 libffi-devel redhat-rpm-config
+        ```
+    *   **For macOS:** Use Homebrew:
+        ```bash
+        brew install mysql pkg-config cairo pango gdk-pixbuf libffi
+        ```
+    *   **For Windows:** Installers for Python and MySQL usually handle dependencies. Ensure `mysqlclient` can be installed (it might require Visual C++ Build Tools). PDF generation might require extra steps depending on the library.
+
+---
+
 ### Setting Up MySQL Community Server
 
 Step 1: Download MySQL Community Server
@@ -232,53 +273,112 @@ mysql -u root -p < schema_setup.sql
 - **Responsive web interface**
 ---
 
-## Tech Stack
 
-| Category          | Technologies Used |
-|-------------------|-------------------|
-| **AI/ML**         | TensorFlow, Keras, Scikit-learn |
-| **ECG Processing**| NeuroKit2, WFDB |
-| **Backend**       | Flask, MySQL |
-| **Visualization** | Plotly, Matplotlib |
-| **Deployment**    | Docker, AWS |
+---
+### 3. Application Setup
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/hruthvik-04/AI-ECG-ANALYSIS-PROJECT.git
+    cd AI-ECG-ANALYSIS-PROJECT
+    ```
+
+2.  **Create Virtual Environment:**
+    ```bash
+    python -m venv venv
+    ```
+
+3.  **Activate Environment:**
+    *   Linux/macOS: `source venv/bin/activate`
+    *   Windows (cmd/powershell): `.\venv\Scripts\activate`
+
+4.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+    *(Ensure you have created the `requirements.txt` file provided in the previous response)*
+
+5.  **Download ECG Datasets:**
+    *   Place the **MIT-BIH Arrhythmia Database** files (e.g., `100.dat`, `100.hea`, `100.atr`, etc.) inside the `mit-bih-arrhythmia-database-1.0.0/` directory within the project root. You can download it from [PhysioNet](https://physionet.org/content/mitdb/1.0.0/).
+    *   *(If using PTB-XL, specify its location and update relevant code paths)*
+
+6.  **Place ML Model:**
+    *   Ensure your trained model file (e.g., `ecg_arrhythmia_detector_....h5`) is placed in the `model/` directory within the project root.
+
+7.  **Configure Application:**
+    *   Open the main Flask application file (e.g., `app.py`).
+    *   **Crucially, update the MySQL connection details:**
+        ```python
+        app.config["MYSQL_HOST"] = "localhost" # Or your MySQL host
+        app.config["MYSQL_USER"] = "your_mysql_user" # Replace with your user
+        app.config["MYSQL_PASSWORD"] = "your_mysql_password" # Replace with your password
+        app.config["MYSQL_DB"] = "hospital_ecg_db"
+        ```
+    *   **Set a strong `app.secret_key`:** This is vital for session security. Replace the default value. You can generate one using `python -c 'import os; print(os.urandom(24).hex())'`.
+    *   Verify `DATASET_PATH`, `MODEL_PATH`, and other paths if you've placed files differently. *(Consider using environment variables for configuration in production)*.
 
 ---
 
----
-Setup
-Clone the repository:
-```
-bash
-git clone https://github.com/hruthvik-04/ecgcode.git
-cd ecgcode
+## Running the Application
 
-```
-Create and activate virtual environment:
-```
-bash
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate    # Windows
-```
-Install dependencies: from  Requirement.txt
-
-
-```
-bash
-pip install -r Requirement.txt
-
-```
-
-Configure MySQL: WITH YOUR PASSWORD AND host
-
+1.  Ensure your virtual environment is activated.
+2.  Make sure your MySQL server is running.
+3.  Run the Flask development server:
+    ```bash
+    flask run
+    # Or if your main file is app.py: python app.py
+    ```
+4.  Open your web browser and navigate to `http://127.0.0.1:5000` (or the address shown in the terminal).
 
 ---
-After configuring the mysql in flask app.py
-run this in your terminal
 
-```
-flask run app.py
-```
+## Usage
+
+1.  **Login:** Access the application via your browser.
+    *   **Staff:** Use the main login page (`/`) with Staff credentials.
+    *   **Doctors:** Use the `/doctor_login` page with Doctor credentials.
+2.  **Staff:**
+    *   Register new patients via the `/patient_registration` page.
+    *   Edit existing patient details via `/edit_patient/<patient_id>`.
+3.  **Doctors:**
+    *   Access the main dashboard (`/input_form`) after login.
+    *   Search for patients by ID.
+    *   View patient details and medical history.
+    *   Enter ECG record numbers and clinical data to perform automatic analysis (`/automatic_analysis/<patient_id>`).
+    *   View analysis results, risk scores, and interactive ECG plots on the `/result` page (rendered automatically).
+    *   View and optionally download PDF reports (`/generate_report/<patient_id>`).
+
+---
+
+## PDF Report Generation
+
+*   The application can generate PDF reports of the analysis results.
+*   This feature requires either `xhtml2pdf` (fallback) or `WeasyPrint` (preferred, better results but more complex installation with system dependencies) to be installed.
+*   If neither library is found, PDF download buttons may be disabled, and a warning will be logged at startup.
+
+---
+
+## Contributing
+
+Contributions are welcome! If you'd like to contribute, please follow these steps:
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+---
+
+## License
+
+Distributed under the MIT License. See `LICENSE` file for more information.
+
+---
+
+## Contact
+
+Hruthvik - [hruthvik2K3@gmail.com](mailto:hruthvik2K3@gmail.com)
 
 
-
+Project Link: [https://github.com/hruthvik-04/AI-ECG-ANALYSIS-PROJECT](https://github.com/hruthvik-04/AI-ECG-ANALYSIS-PROJECT)
